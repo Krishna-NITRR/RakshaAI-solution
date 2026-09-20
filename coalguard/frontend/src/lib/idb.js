@@ -17,7 +17,10 @@ export async function addToQueue(inspectionData) {
   const db = await initDB();
   await db.put(STORE_NAME, {
     ...inspectionData,
-    created_local_at: new Date().toISOString()
+    created_local_at: new Date().toISOString(),
+    sync_state: 'pending',
+    retry_count: 0,
+    last_error: null,
   });
 }
 
@@ -29,4 +32,9 @@ export async function getQueue() {
 export async function removeFromQueue(temp_uuid) {
   const db = await initDB();
   await db.delete(STORE_NAME, temp_uuid);
+}
+
+export async function updateQueueItem(item) {
+  const db = await initDB();
+  await db.put(STORE_NAME, item);
 }

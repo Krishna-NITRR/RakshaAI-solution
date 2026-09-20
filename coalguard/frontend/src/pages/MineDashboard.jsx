@@ -38,6 +38,9 @@ export default function MineDashboard() {
           <a href="/khaan-netra/index.html" target="_blank" rel="noreferrer" className="btn-primary" style={{ background: '#3b82f6', color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
             Open Khaan Netra (CV Scanner)
           </a>
+          <a href="/telemetry" className="btn-primary" style={{ width: 'auto', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+            Live telemetry
+          </a>
         </div>
       </div>
       

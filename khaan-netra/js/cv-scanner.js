@@ -354,8 +354,7 @@ function _updateHUD() {
   if (fpsEl) fpsEl.textContent = `${_fps} FPS`;
   if (modelEl) modelEl.textContent = _model ? 'YOLOv8 ACTIVE' : 'NO MODEL';
   if (personEl) {
-    // Check if the model detected a person directly, or if it detected PPE
-    const hasPerson = _lastDetections && _lastDetections.some(d => d.item === 'Person' || d.item !== 'Machinery');
+    const hasPerson = _lastDetections?.some(d => d.item === 'Person');
     personEl.textContent = hasPerson ? 'PERSON DETECTED' : 'NO PERSON';
     const dot = personEl.previousElementSibling;
     if (dot) {

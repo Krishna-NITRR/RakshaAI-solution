@@ -209,6 +209,18 @@ async function _waitForScan() {
   try {
     const result = await CVScanner.performScan(identity);
     _showScanResult(result);
+    if (result.verdict === 'deny' && window.KhaanApiBridge?.sendCvIncident) {
+      void window.KhaanApiBridge.sendCvIncident({
+        worker_id: result.workerId,
+        captured_at: new Date(result.timestamp).toISOString(),
+        snapshot: result.snapshot,
+        detections: (result.missingEssential || []).map(item => ({
+          incident_type: `missing_${item.toLowerCase().replace(/\s+/g, '_')}`,
+          confidence: 1,
+        })),
+        source: `khaan-netra:${identity.source}`,
+      });
+    }
   } catch (err) {
     console.error('[App] Scan failed:', err);
     if (resultPanel) {

@@ -83,3 +83,52 @@ class RiskScore(Base):
     score = Column(Float)
     reasons_json = Column(JSON)
     calculated_at = Column(DateTime, default=datetime.utcnow)
+
+
+class TelemetryEvent(Base):
+    __tablename__ = "telemetry_events"
+    id = Column(String, primary_key=True, default=generate_uuid)
+    asset_id = Column(String, index=True)
+    mine_id = Column(String, nullable=True, index=True)
+    generated_at = Column(DateTime, default=datetime.utcnow, index=True)
+    payload = Column(JSON)
+
+
+class PlatformTicket(Base):
+    __tablename__ = "platform_tickets"
+    id = Column(String, primary_key=True)
+    mine_id = Column(String, nullable=True, index=True)
+    title = Column(String)
+    description = Column(Text)
+    source = Column(String, index=True)
+    severity = Column(String)
+    status = Column(String, index=True)
+    assignee = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+    timeline = Column(JSON)
+
+
+class CvIncidentRecord(Base):
+    __tablename__ = "cv_incident_records"
+    id = Column(String, primary_key=True)
+    mine_id = Column(String, nullable=True, index=True)
+    fingerprint = Column(String, index=True)
+    worker_id = Column(String)
+    asset_id = Column(String)
+    captured_at = Column(DateTime, default=datetime.utcnow)
+    received_at = Column(DateTime, default=datetime.utcnow)
+    source = Column(String)
+    snapshot = Column(Text, nullable=True)
+    detections = Column(JSON)
+    status = Column(String, default="OPEN")
+
+
+class SyncReceipt(Base):
+    __tablename__ = "sync_receipts"
+    temp_uuid = Column(String, primary_key=True)
+    mine_id = Column(String, nullable=True, index=True)
+    entity = Column(String)
+    server_id = Column(String)
+    result = Column(JSON)
+    synced_at = Column(DateTime, default=datetime.utcnow)

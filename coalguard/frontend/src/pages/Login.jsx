@@ -14,14 +14,14 @@ export default function Login() {
       const res = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.access_token);
       
-      if(email.includes('corporate')) {
+      if (res.data.role === 'r-corporate') {
         navigate('/corporate');
-      } else if (email.includes('manager')) {
-        navigate('/mine/c0000000-0000-0000-0000-000000000000');
+      } else if (res.data.role === 'r-manager' && res.data.mine_id) {
+        navigate(`/mine/${res.data.mine_id}`);
       } else {
         navigate('/inspect');
       }
-    } catch (err) {
+    } catch {
       setError('Invalid credentials');
     }
   };

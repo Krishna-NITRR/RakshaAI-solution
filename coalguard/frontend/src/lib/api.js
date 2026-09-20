@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { getQueue, removeFromQueue } from './idb';
+import { getQueue, removeFromQueue, updateQueueItem } from './idb';
 
-const API_URL = 'http://localhost:8000'; // Default FastAPI URL
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -20,20 +20,24 @@ export async function syncOfflineQueue() {
   const queue = await getQueue();
   if (queue.length === 0) return 0;
   
-  let synced = 0;
-  for (const item of queue) {
-    try {
-      // POST the inspection (Idempotent endpoint will return 200 or 201)
-      await api.post('/inspections', item);
-      await removeFromQueue(item.temp_uuid);
-      synced++;
-    } catch (err) {
-      console.error("Failed to sync item", item.temp_uuid, err);
-      // If 422, there's a logic error, maybe we should still delete it or flag it.
-      // For MVP, we'll keep it in queue to retry or add manual clear later.
+  try {
+    const response = await api.post('/api/sync/batch', { items: queue });
+    let synced = 0;
+    for (const [index, result] of response.data.results.entries()) {
+      const item = queue[index];
+      if (result.ok) {
+        await removeFromQueue(item.temp_uuid);
+        synced++;
+      } else {
+        await updateQueueItem({ ...item, sync_state: 'error', retry_count: (item.retry_count || 0) + 1, last_error: result.error });
+      }
     }
+    return synced;
+  } catch (err) {
+    await Promise.all(queue.map((item) => updateQueueItem({ ...item, sync_state: 'error', retry_count: (item.retry_count || 0) + 1, last_error: err.message })));
+    console.error('Failed to sync offline batch', err);
+    return 0;
   }
-  return synced;
 }
 
 export default api;

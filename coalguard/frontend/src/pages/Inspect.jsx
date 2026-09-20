@@ -4,7 +4,7 @@ import { addToQueue, getQueue } from '../lib/idb';
 import { syncOfflineQueue } from '../lib/api';
 
 export default function Inspect() {
-  const [mineId, setMineId] = useState('c0000000-0000-0000-0000-000000000000');
+  const mineId = 'c0000000-0000-0000-0000-000000000000';
   const [severity, setSeverity] = useState('Low');
   const [description, setDescription] = useState('');
   const [photo, setPhoto] = useState(false);
@@ -84,7 +84,8 @@ export default function Inspect() {
       setGps({ lat: null, lon: null });
     } catch (err) {
       if (err.response?.status === 422) {
-        setError(err.response.data.detail.message || 'Validation failed');
+        const detail = err.response.data.detail;
+        setError(typeof detail === 'string' ? detail : detail?.message || 'Validation failed');
       } else {
         setError('Failed to submit inspection');
       }

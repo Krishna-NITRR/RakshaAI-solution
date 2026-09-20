@@ -1,12 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from models.database import get_db
-from models import User, CorrectiveAction, AuditLog
+from models import User, CorrectiveAction, AuditLog, Observation, Inspection
 from schemas.governance import ActionCreate, ActionUpdate, ActionResponse, AuditEventResponse
 from auth import get_current_user, verify_role
 from services.audit import log_action
 
 router = APIRouter(prefix="/corrective-actions", tags=["actions"])
+
+
+@router.get("/{action_id}/timeline")
+def get_action_timeline(action_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    action = db.query(CorrectiveAction).filter(CorrectiveAction.id == action_id).first()
+    if not action:
+        raise HTTPException(status_code=404, detail="Action not found")
+    return db.query(AuditLog).filter(AuditLog.entity_type == "CorrectiveAction", AuditLog.entity_id == action_id).order_by(AuditLog.created_at.asc()).all()
 
 @router.post("/{action_id}/verify")
 def verify_action(

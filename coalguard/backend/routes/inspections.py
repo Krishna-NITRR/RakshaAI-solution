@@ -19,8 +19,8 @@ def create_inspection(
     if existing:
         return existing
         
-    if payload.severity == "High" and not payload.photo_url:
-        raise HTTPException(status_code=422, detail="Photo required for high severity")
+    if payload.severity in {"High", "Critical"} and not payload.photo_url:
+        raise HTTPException(status_code=422, detail="Photo required for high or critical severity")
         
     if not payload.gps_lat or not payload.gps_lon:
         raise HTTPException(status_code=422, detail="GPS coordinates required")
@@ -28,10 +28,14 @@ def create_inspection(
     insp_id = str(uuid.uuid4())
     obs_id = str(uuid.uuid4())
     
+    mine_id = current_user.mine_id if current_user.role_id != "r-corporate" else payload.mine_id
+    if not mine_id or (current_user.role_id != "r-corporate" and payload.mine_id != mine_id):
+        raise HTTPException(status_code=403, detail="Inspection mine scope does not match current user")
+
     new_insp = Inspection(
         id=insp_id,
         temp_uuid=payload.temp_uuid,
-        mine_id=payload.mine_id,
+        mine_id=mine_id,
         inspector_id=current_user.id,
         gps_lat=payload.gps_lat,
         gps_lon=payload.gps_lon
