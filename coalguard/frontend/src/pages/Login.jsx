@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
+import { saveSession } from '../lib/auth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,7 +13,7 @@ export default function Login() {
     e.preventDefault();
     try {
       const res = await api.post('/auth/login', { email, password });
-      localStorage.setItem('token', res.data.access_token);
+      saveSession(res.data);
       
       if (res.data.role === 'r-corporate') {
         navigate('/corporate');

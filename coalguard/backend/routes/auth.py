@@ -23,6 +23,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         "access_token": access_token,
         "token_type": "bearer",
         "user_id": user.id,
+        "name": user.name,
         "role": user.role_id,
         "mine_id": user.mine_id,
     }

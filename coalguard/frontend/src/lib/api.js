@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getQueue, removeFromQueue, updateQueueItem } from './idb';
+import { clearSession } from './auth';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -14,6 +15,17 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
+      clearSession();
+      window.location.assign('/login');
+    }
+    return Promise.reject(error);
+  },
+);
 
 // Offline Sync function
 export async function syncOfflineQueue() {
